@@ -1,0 +1,32 @@
+# Cloudflare Pages / Netlify header rules.
+#
+# Model weights are large and immutable once fetched; the browser's Cache Storage
+# holds them, but these headers keep the static shell cheap to revalidate.
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+
+# NOTE ON CROSS-ORIGIN ISOLATION
+#
+# wllama's multi-threaded WASM build needs SharedArrayBuffer, which needs:
+#   Cross-Origin-Opener-Policy: same-origin
+#   Cross-Origin-Embedder-Policy: require-corp
+#
+# Those are deliberately NOT set here. Enabling COEP blocks any cross-origin
+# subresource that does not send Cross-Origin-Resource-Policy, and the model
+# weights come from huggingface.co and cdn.jsdelivr.net. Turning it on trades a
+# working WebGPU path for a faster WASM fallback, which is the wrong trade for
+# most visitors. The app detects the absence of SharedArrayBuffer and falls back
+# to the single-threaded build automatically.
+#
+# If you are serving your own weights from the same origin and want the threaded
+# build, uncomment these two lines:
+#
+# /*
+#   Cross-Origin-Opener-Policy: same-origin
+#   Cross-Origin-Embedder-Policy: require-corp

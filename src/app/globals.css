@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* No webfont is downloaded: the build stays offline-safe and the first
+       paint has no font swap. Optimistic is Meta's own UI face and will be
+       picked up on machines that have it. */
+    --font-sans: 'Optimistic Display', 'Inter', -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, SFMono-Regular, Menlo,
+      Consolas, 'Liberation Mono', monospace;
+
+    --background: 0 0% 100%;
+    --foreground: 220 26% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 26% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 26% 12%;
+
+    /* Meta blue #0064E0 */
+    --primary: 213 100% 44%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 213 30% 96%;
+    --secondary-foreground: 220 26% 16%;
+
+    --muted: 214 20% 96%;
+    --muted-foreground: 218 12% 42%;
+
+    --accent: 213 100% 96%;
+    --accent-foreground: 213 100% 32%;
+
+    --destructive: 3 64% 47%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 216 18% 89%;
+    --input: 216 18% 87%;
+    --ring: 213 100% 44%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 220 26% 8%;
+    --foreground: 213 20% 96%;
+
+    --card: 220 24% 11%;
+    --card-foreground: 213 20% 96%;
+
+    --popover: 220 24% 11%;
+    --popover-foreground: 213 20% 96%;
+
+    --primary: 213 100% 56%;
+    --primary-foreground: 220 40% 8%;
+
+    --secondary: 220 20% 17%;
+    --secondary-foreground: 213 20% 96%;
+
+    --muted: 220 20% 16%;
+    --muted-foreground: 215 15% 65%;
+
+    --accent: 213 60% 20%;
+    --accent-foreground: 213 100% 84%;
+
+    --destructive: 3 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 18% 20%;
+    --input: 220 18% 24%;
+    --ring: 213 100% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Meta docs use tight, confident numerals in tables. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-meta-100 text-meta-900;
+  }
+}
+
+@layer components {
+  /* Subtle dotted technical grid used behind the hero, echoing Meta's Llama site. */
+  .grid-backdrop {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      hsl(var(--border)) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+
+  .hairline {
+    box-shadow: inset 0 -1px 0 0 hsl(var(--border));
+  }
+
+  .focus-ring {
+    @apply outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}
+
+/* Scrollbars: thin and neutral so dense tables do not feel noisy. */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 999px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
