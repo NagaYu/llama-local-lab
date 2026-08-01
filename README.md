@@ -3,6 +3,8 @@
 **Zero-Cost Llama Evaluation Studio** — answer the three questions everyone asks before
 running Llama locally, entirely in the browser.
 
+### → [nagayu.github.io/llama-local-lab](https://nagayu.github.io/llama-local-lab/)
+
 > Which quantization fits my GPU? How much quality do I lose? What does inference actually
 > cost per month?
 
