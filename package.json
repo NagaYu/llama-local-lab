@@ -2,13 +2,14 @@
   "name": "llama-local-lab",
   "version": "1.0.0",
   "private": true,
-  "description": "Zero-Cost Llama Evaluation Studio — quantization planning, GGUF command generation, inference cost modeling, and 100% in-browser Llama inference.",
+  "description": "Zero-Cost Llama Evaluation Studio \u2014 quantization planning, GGUF command generation, inference cost modeling, and 100% in-browser Llama inference.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "npx serve@latest out",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy:spaces": "bash spaces/deploy.sh"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "0.2.79",
