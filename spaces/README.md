@@ -7,7 +7,7 @@ sdk: static
 app_file: index.html
 pinned: false
 license: mit
-short_description: Which Llama quant fits your GPU, what quality it costs, and what inference runs per month
+short_description: Which Llama quant fits your GPU, and what it costs
 tags:
   - llama
   - quantization

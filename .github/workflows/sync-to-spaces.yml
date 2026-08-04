@@ -46,6 +46,25 @@ jobs:
             echo "::error::Build carries a basePath; Spaces serves from the root."
             exit 1
           fi
+
+          # The Hub enforces limits on the Space card that its validate-yaml
+          # endpoint does not, so a card can look valid right up until the
+          # upload rejects it. Check the ones that bite here instead.
+          python3 - <<'PY'
+          import re, sys, yaml
+          fm = re.match(r'^---\n(.*?)\n---\n', open('.hf/README.md').read(), re.S)
+          if not fm:
+              sys.exit('::error::.hf/README.md has no YAML frontmatter.')
+          meta = yaml.safe_load(fm.group(1))
+          for field, limit in (('short_description', 60), ('title', 100)):
+              value = meta.get(field)
+              if value and len(value) > limit:
+                  sys.exit(f'::error::Space card "{field}" is {len(value)} chars; the Hub allows {limit}.')
+          if meta.get('sdk') != 'static':
+              sys.exit(f'::error::Space card sdk is {meta.get("sdk")!r}; this build only works as "static".')
+          print('Space card metadata OK')
+          PY
+
           echo "Assembled $(find .hf -type f | wc -l) files"
 
       - name: Install the HuggingFace CLI
