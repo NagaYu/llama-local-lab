@@ -43,9 +43,13 @@ you commit to fetching weights.
 
 ## Why the sizing numbers are different
 
-Most calculators use `params × bits ÷ 8`. On Llama 3+ that is wrong by 10–25% for small
-models: the 128k-token vocabulary makes `token_embd` and `output` about 21% of Llama 3.2 1B,
-and `llama-quantize` deliberately keeps those tensors at higher precision than the blocks.
+Most calculators use `params × bits ÷ 8`. That is fine for a 70B (+0.7% at Q4_K_M) and
+quietly falls apart as models shrink and quantization gets aggressive — Llama 3.2 1B comes
+out **7% light at Q4_K_M and 21% light at Q2_K**.
+
+Both trends have one cause. `token_embd` and `output` are sized `vocab × hidden`, so Llama
+3's 128k vocabulary is a fixed cost that does not shrink with the model (about 21% of Llama
+3.2 1B), and `llama-quantize` keeps those tensors at higher precision than the blocks.
 
 This tool sizes them separately, and handles the tied-embedding case (Llama 3.2 1B/3B) where
 the shared table stays at *output* precision instead of following the blocks down to 2 bits.

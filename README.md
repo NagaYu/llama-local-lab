@@ -111,10 +111,20 @@ estimates against reality.
 
 ### File size
 
-A flat `params × bits ÷ 8` is wrong for Llama 3 and later, often by 10–25% on small models.
-Llama 3's 128k-token vocabulary makes `token_embd` and `output` a large share of the
-parameters (about 21% of Llama 3.2 1B), and `llama-quantize` deliberately keeps those
-tensors at higher precision than the transformer blocks.
+A flat `params × bits ÷ 8` is fine for a 70B and quietly falls apart as models shrink and
+quantization gets more aggressive:
+
+| Naive formula vs published GGUF | Q4_K_M | Q2_K |
+|---|---|---|
+| Llama 3.3 70B | +0.7% | −1.0% |
+| Llama 3.1 8B | −1.1% | −6.6% |
+| Llama 3.2 3B | −3.7% | −12.7% |
+| Llama 3.2 1B | **−7.2%** | **−20.9%** |
+
+Both trends have the same cause. `token_embd` and `output` are sized `vocab × hidden`, so
+Llama 3's 128k-token vocabulary makes them a fixed cost that does not shrink with the model
+— about 21% of Llama 3.2 1B. And `llama-quantize` deliberately keeps those tensors at
+higher precision than the transformer blocks, so the gap widens as the blocks drop.
 
 So the planner splits them:
 
