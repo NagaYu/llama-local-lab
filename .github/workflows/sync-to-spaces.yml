@@ -103,9 +103,12 @@ jobs:
           # deploy would strand the previous build's assets in the Space and it
           # would grow without bound. Deletes and adds land in one commit, so
           # the paths being re-uploaded are never actually missing.
+          # One pattern, not a list: the CLI's argument parser changed between
+          # releases and a space-separated list is read as positional arguments
+          # by the newer one. A single value parses the same way in both.
           hf upload "$SPACE_ID" .hf . \
             --repo-type space \
-            --delete "_next/**" "style.css" \
+            --delete "_next/**" \
             --commit-message "Sync from ${GITHUB_SHA::7}"
 
           echo "✓ https://huggingface.co/spaces/${SPACE_ID}"
