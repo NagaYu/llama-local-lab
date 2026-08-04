@@ -99,8 +99,13 @@ jobs:
           # `hf upload` authenticates from HF_TOKEN directly. Pushing with git
           # over HTTPS needs the account name embedded in the URL as well, which
           # is an easy thing to get silently wrong; the CLI has no such trap.
+          # Next.js hashes every chunk filename, so without a delete pass each
+          # deploy would strand the previous build's assets in the Space and it
+          # would grow without bound. Deletes and adds land in one commit, so
+          # the paths being re-uploaded are never actually missing.
           hf upload "$SPACE_ID" .hf . \
             --repo-type space \
+            --delete "_next/**" "style.css" \
             --commit-message "Sync from ${GITHUB_SHA::7}"
 
           echo "✓ https://huggingface.co/spaces/${SPACE_ID}"
