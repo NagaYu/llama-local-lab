@@ -1,0 +1,74 @@
+name: Sync to HuggingFace Spaces
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A Space is a git repo; pushing to it replaces the served files. Let one push
+# finish before the next starts rather than racing two force-pushes.
+concurrency:
+  group: hf-spaces
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    # Skip silently on forks and on repos where the secret was never added,
+    # so a missing token is not a red X on every push.
+    if: github.repository_owner == 'NagaYu'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build static export
+        # Spaces serve from the root of the space subdomain, so unlike the
+        # GitHub Pages job this build must carry no basePath.
+        run: npm run build
+        env:
+          BASE_PATH: ''
+
+      - name: Assemble the Space repo
+        run: |
+          set -euo pipefail
+          rm -rf .hf && mkdir -p .hf
+          cp -R out/. .hf/
+          cp spaces/README.md .hf/README.md
+          rm -f .hf/.nojekyll   # GitHub Pages marker, meaningless on Spaces
+
+          if grep -q '/llama-local-lab/_next' .hf/index.html; then
+            echo "::error::Build carries a basePath; Spaces serves from the root."
+            exit 1
+          fi
+          echo "Assembled $(find .hf -type f | wc -l) files"
+
+      - name: Push to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE_ID: YutaN13/llama-local-lab
+        run: |
+          set -euo pipefail
+          if [ -z "${HF_TOKEN:-}" ]; then
+            echo "::error::HF_TOKEN secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          cd .hf
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Sync from ${GITHUB_SHA::7}"
+
+          # The Space's history is disposable — it is a build artifact, not the
+          # source of truth. Force-push so the two never need reconciling.
+          git push -q --force \
+            "https://user:${HF_TOKEN}@huggingface.co/spaces/${SPACE_ID}" main
+
+          echo "✓ https://huggingface.co/spaces/${SPACE_ID}"
