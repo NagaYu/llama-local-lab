@@ -48,10 +48,12 @@ jobs:
           fi
           echo "Assembled $(find .hf -type f | wc -l) files"
 
-      - name: Push to the Space
+      - name: Install the HuggingFace CLI
+        run: pip install --quiet --upgrade "huggingface_hub[cli]"
+
+      - name: Verify the token
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          SPACE_ID: YutaN13/llama-local-lab
         run: |
           set -euo pipefail
           if [ -z "${HF_TOKEN:-}" ]; then
@@ -59,16 +61,27 @@ jobs:
             exit 1
           fi
 
-          cd .hf
-          git init -q -b main
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Sync from ${GITHUB_SHA::7}"
+          # Resolve the token to an account before uploading. A bad token fails
+          # here with a readable message instead of surfacing as a git exit 128
+          # from the push, which says nothing about why.
+          if ! WHO="$(hf auth whoami 2>&1)"; then
+            echo "::error::HF rejected the token. Create a new one with **write** scope at https://huggingface.co/settings/tokens and update the HF_TOKEN secret. Copy it with the copy button — a hand-typed token can pick up look-alike characters that are not ASCII."
+            echo "$WHO"
+            exit 1
+          fi
+          echo "Authenticated as: $WHO"
 
-          # The Space's history is disposable — it is a build artifact, not the
-          # source of truth. Force-push so the two never need reconciling.
-          git push -q --force \
-            "https://user:${HF_TOKEN}@huggingface.co/spaces/${SPACE_ID}" main
+      - name: Upload to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE_ID: YutaN13/llama-local-lab
+        run: |
+          set -euo pipefail
+          # `hf upload` authenticates from HF_TOKEN directly. Pushing with git
+          # over HTTPS needs the account name embedded in the URL as well, which
+          # is an easy thing to get silently wrong; the CLI has no such trap.
+          hf upload "$SPACE_ID" .hf . \
+            --repo-type space \
+            --commit-message "Sync from ${GITHUB_SHA::7}"
 
           echo "✓ https://huggingface.co/spaces/${SPACE_ID}"
