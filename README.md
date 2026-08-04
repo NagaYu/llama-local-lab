@@ -132,7 +132,7 @@ output head.
 The per-format values in [`src/data/quants.ts`](src/data/quants.ts) were back-solved
 against published GGUF uploads. Across 36 model/quant pairs spanning Llama 3.1 8B,
 3.3 70B, 3.2 3B and 3.2 1B, mean absolute error is **0.63%** and the worst case is 2.6% —
-for example Llama 3.1 8B at Q4_K_M predicts 4.95 GB against a real file of 4.92 GB.
+for example Llama 3.1 8B at Q4_K_M predicts 4.96 GB against a real file of 4.92 GB.
 
 ### KV cache
 

@@ -53,7 +53,7 @@ the shared table stays at *output* precision instead of following the blocks dow
 Calibrated against 36 published GGUF files spanning Llama 3.1 8B, 3.3 70B, 3.2 3B and 3.2 1B:
 
 - **Mean absolute error 0.63%**, worst case 2.6%
-- Llama 3.1 8B at Q4_K_M predicts 4.95 GB against a real file of 4.92 GB
+- Llama 3.1 8B at Q4_K_M predicts 4.96 GB against a real file of 4.92 GB
 
 Throughput is derived from memory bandwidth rather than a lookup table
 (`bandwidth × utilization ÷ bytes-read-per-token`), with a per-architecture efficiency
